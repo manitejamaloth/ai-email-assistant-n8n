@@ -28,7 +28,7 @@ Manually checking, reading, and responding to emails every day is time-consuming
 
 ## 📄 Workflow Export
 
-Full workflow JSON available in this repo — see `![workflow.json](https://github.com/manitejamaloth/ai-email-assistant-n8n/blob/b83227b54bd22dfe3e732025a9873933fde9c362/AI-Powered%20Email%20Asst.json)`.
+Full workflow JSON available in this repo — see [workflow.json](https://github.com/manitejamaloth/ai-email-assistant-n8n/blob/b83227b54bd22dfe3e732025a9873933fde9c362/AI-Powered%20Email%20Asst.json).
 
 ## 💡 Impact
 
