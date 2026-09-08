@@ -1,0 +1,524 @@
+{
+  "name": "AI-Powered Email Asst",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const text = $json.output[0].content[0].text;\n\nconst data = JSON.parse(text);\n\nreturn [\n  {\n    json: {\n      role: $json.output[0].role,\n      ...data\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        96
+      ],
+      "id": "c95a4935-cf8c-4990-88b8-a39f73ed35e2",
+      "name": "Output Content as JSON"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a49cf61e-cd8d-485f-ad27-88eb813f102b",
+              "leftValue": "={{ $json.reply_needed }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        96
+      ],
+      "id": "3426f4cd-852c-474f-9d0c-0b0c1daa0cdf",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Gmail Trigger').item.json.subject }}",
+        "emailType": "html",
+        "message": "={{ $('Output Content as JSON').item.json.suggested_reply }}",
+        "options": {
+          "threadId": "={{ $('Gmail Trigger').item.json.threadId }}",
+          "sendTo": "={{ $('Gmail Trigger').item.json.from.value[0].address }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "acd2c3f9-0d80-4157-8d7a-fd4ed567a730",
+      "name": "Create a draft",
+      "webhookId": "bebf2404-7ff9-469c-babc-6b056d916fdc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "AEyRW11lxaiZafIq",
+          "name": "og_mail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "1409278768",
+        "message": "=🔔 New Email Alert!\n\n📄 Summary:  {{ $('Output Content as JSON').item.json.summary }}\n\n✅ Reply Required: Yes\n\n✍️ Suggested Reply: {{ $('Output Content as JSON').item.json.suggested_reply }}\n\n\n📩 What next?\n• Review and edit the draft reply in your Gmail\n• Or approve it by clicking [Approve & Disapprove] buttons below ",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "1d82dd29-a934-4d03-b162-f0359b551570",
+      "name": "Send message and wait for response",
+      "webhookId": "96e5d852-cc43-415e-8251-b897cfba0b25",
+      "credentials": {
+        "telegramApi": {
+          "id": "J0sX1v7yI0yc1v5g",
+          "name": "themtcut_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "operation": "get",
+        "messageId": "={{ $('Create a draft').item.json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        -96
+      ],
+      "id": "7a116efa-64c9-47d0-aa16-b1d855a97e92",
+      "name": "Get original draft",
+      "webhookId": "38347653-539b-476e-835d-9511d02edecd",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "AEyRW11lxaiZafIq",
+          "name": "og_mail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/drafts/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1920,
+        -96
+      ],
+      "id": "1c65a9b5-46f4-424d-8ece-15712d879df0",
+      "name": "HTTP Request",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "AEyRW11lxaiZafIq",
+          "name": "og_mail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "44827be2-7cbd-437b-8a42-93a14426028b",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "4c24c1a2-9677-4682-89bd-19d36688d76a",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        96
+      ],
+      "id": "bf997403-a2bb-44ca-966d-2ca59910ebd8",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "1409278768",
+        "message": "=🔔 New Email Alert!\n\n📄 Summary: {{ $('Output Content as JSON').item.json.summary }}\n❌ Reply Required: No\n\n🙏 You don’t need to take any action.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        192
+      ],
+      "id": "64471896-7a50-4c57-a7a3-6ceee23605f7",
+      "name": "New email summary",
+      "webhookId": "96e5d852-cc43-415e-8251-b897cfba0b25",
+      "credentials": {
+        "telegramApi": {
+          "id": "J0sX1v7yI0yc1v5g",
+          "name": "themtcut_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ],
+          "readStatus": "unread"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        96
+      ],
+      "id": "74172463-ac1a-4146-bfbb-0c6fb69af9e8",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "AEyRW11lxaiZafIq",
+          "name": "og_mail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a helpful email assistant. Your job is to read incoming emails,\nsummarize them in one line, and decide whether they need a reply. If a\nreply is needed, you will draft a polite response based on the email\ncontent. Always draft the response in the HTML format so that it is ready\nto be sent."
+            },
+            {
+              "content": "=Your Tasks:\n\n1. Summarize the email given below in one line.\n2. Tell me if a reply is needed (Yes/No).\n3. If yes, suggest a short and polite reply I can send.\n\nPlease respond in the following JSON format:\n\n{\n  \"summary\": \"One sentence summary of the email\",\n  \"reply_needed\": \"Yes or No\",\n  \"suggested_reply\": \"Only if reply_needed is Yes, else leave as empty string\"\n}\n\nHer is the email body received:\n************\n\n{{ $json.text }}\n\n************"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        96
+      ],
+      "id": "360f9314-cde1-48e5-944f-677bf295ed7b",
+      "name": "summarize and reply",
+      "credentials": {
+        "openAiApi": {
+          "id": "M3bt823UufkOwtv4",
+          "name": "OpenAI account_manitejamaloth"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "summarize and reply": [
+      {
+        "json": {
+          "id": "resp_04cb9d646f620934006a955f23745087d2982f93e70409d1ff",
+          "object": "response",
+          "created_at": 1788174115,
+          "status": "completed",
+          "background": false,
+          "billing": {
+            "payer": "developer"
+          },
+          "completed_at": 1788174117,
+          "frequency_penalty": 0,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": null,
+          "max_tool_calls": null,
+          "model": "gpt-4o-mini-2024-07-18",
+          "moderation": null,
+          "output": [
+            {
+              "id": "msg_04cb9d646f620934006a955f24c9fc87d2bc1a2c6501bee77a",
+              "type": "message",
+              "status": "completed",
+              "content": [
+                {
+                  "type": "output_text",
+                  "annotations": [],
+                  "logprobs": [],
+                  "text": "{\n  \"summary\": \"Chaitanya is requesting a call to discuss enterprise pricing and implementation for around 200 employees.\",\n  \"reply_needed\": \"Yes\",\n  \"suggested_reply\": \"<p>Hi Chaitanya,</p> <p>Thank you for reaching out. I would be happy to discuss the enterprise pricing and implementation with you. Please let me know your available times, and we can schedule a call at your earliest convenience.</p> <p>Best regards,<br>Maniteja</p>\"\n}"
+                }
+              ],
+              "role": "assistant"
+            }
+          ],
+          "parallel_tool_calls": true,
+          "presence_penalty": 0,
+          "previous_response_id": null,
+          "prompt_cache_key": null,
+          "prompt_cache_retention": "in_memory",
+          "reasoning": {
+            "context": null,
+            "effort": null,
+            "summary": null
+          },
+          "safety_identifier": null,
+          "service_tier": "default",
+          "store": true,
+          "temperature": 1,
+          "text": {
+            "format": {
+              "type": "text"
+            },
+            "verbosity": "medium"
+          },
+          "tool_choice": "auto",
+          "tool_usage": {
+            "image_gen": {
+              "input_tokens": 0,
+              "input_tokens_details": {
+                "image_tokens": 0,
+                "text_tokens": 0
+              },
+              "output_tokens": 0,
+              "output_tokens_details": {
+                "image_tokens": 0,
+                "text_tokens": 0
+              },
+              "total_tokens": 0
+            },
+            "web_search": {
+              "num_requests": 0
+            }
+          },
+          "tools": [],
+          "top_logprobs": 0,
+          "top_p": 1,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 232,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 110,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 342
+          },
+          "user": null,
+          "metadata": {}
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Output Content as JSON": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "New email summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get original draft": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get original draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "summarize and reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summarize and reply": {
+      "main": [
+        [
+          {
+            "node": "Output Content as JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "08e16079-1b8d-4747-8430-34779cf0ca27",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "713a7104ce1dc276385bceda102b797ab2b2e4ef8c0d2539544579a33a645d94"
+  },
+  "nodeGroups": [],
+  "id": "kUjPwlN75OsIDvY3",
+  "tags": []
+}
