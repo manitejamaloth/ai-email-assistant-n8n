@@ -24,7 +24,7 @@ Manually checking, reading, and responding to emails every day is time-consuming
 
 ## 📸 Workflow Screenshot
 
-*(Add screenshot of your n8n canvas here)*
+![Workflow Screenshot](https://github.com/manitejamaloth/ai-email-assistant-n8n/blob/454642c38d41bd5cff318ddbabdc9254e00cfc49/Screenshot%202026-09-08%20213014.png)
 
 ## 💡 Impact
 
