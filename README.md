@@ -26,6 +26,10 @@ Manually checking, reading, and responding to emails every day is time-consuming
 
 ![Workflow Screenshot](https://github.com/manitejamaloth/ai-email-assistant-n8n/blob/454642c38d41bd5cff318ddbabdc9254e00cfc49/Screenshot%202026-09-08%20213014.png)
 
+## 📄 Workflow Export
+
+Full workflow JSON available in this repo — see `[workflow.json](https://github.com/manitejamaloth/ai-email-assistant-n8n/blob/b83227b54bd22dfe3e732025a9873933fde9c362/AI-Powered%20Email%20Asst.json)`
+
 ## 💡 Impact
 
 Reduces manual inbox management time significantly by automating triage and response drafting, while keeping a human-in-the-loop for final approval.
